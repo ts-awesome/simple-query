@@ -1,0 +1,17 @@
+{
+  "name": "@viatsyshyn/ts-simple-query",
+  "version": "0.0.0",
+  "description": "TypeScript SimpleQuery evaluator",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --env=node"
+  },
+  "devDependencies": {
+    "jest": "^26.1.0",
+    "typescript": "^3.9.5"
+  },
+  "author": "Volodymyr Iatsyshyn <viatsyshyn@gmail.com>",
+  "license": "ISC"
+}
