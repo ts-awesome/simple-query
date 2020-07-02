@@ -18,6 +18,7 @@ describe('operators', () => {
   const resolver = (x) => x.startsWith('$itemnum.') ? itemnums[x.substring(9)] : d[x];
 
   it('simple equal', async () => {
+    expect(evaluate({a: null}, resolver)).toBe(false);
     expect(evaluate({a: {[REF_OP]: 'a'}}, resolver)).toBe(true);
     expect(evaluate({a: {[REF_OP]: 'b'}}, resolver)).toBe(false);
     expect(evaluate({b: {[REF_OP]: 'b'}}, resolver)).toBe(true);

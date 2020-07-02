@@ -77,7 +77,7 @@ function checkCondition(condition: ISimpleQuery, resolver: ReferenceResolver, op
           return checkCondition(condition, resolver, key);
 
         default:
-          if (typeof condition === 'object' && condition.hasOwnProperty(REF_OP)) {
+          if (typeof condition === 'object' && condition?.hasOwnProperty(REF_OP)) {
             condition = resolver(condition[REF_OP]);
           }
 
