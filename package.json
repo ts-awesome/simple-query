@@ -1,5 +1,5 @@
 {
-  "name": "@viatsyshyn/ts-simple-query",
+  "name": "@ts-awesome/simple-query",
   "version": "0.0.0",
   "description": "TypeScript SimpleQuery evaluator",
   "main": "dist/index.js",
@@ -13,5 +13,5 @@
     "typescript": "^3.9.5"
   },
   "author": "Volodymyr Iatsyshyn <viatsyshyn@gmail.com>",
-  "license": "ISC"
+  "license": "MIT"
 }
