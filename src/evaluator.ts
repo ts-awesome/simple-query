@@ -11,7 +11,8 @@ import {
   NOT_OP,
   OR_OP,
   REF_OP,
-  REGEX_OP
+  REGEX_OP,
+  CONTAINS_OP,
 } from "./operators";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,6 +38,7 @@ const ops = {
   [LT_OP](a, b): boolean { return a < b},
   [LTE_OP](a, b): boolean { return a <= b},
   [IN_OP](a, b): boolean { return Array.isArray(b) && (Array.isArray(a) ? a.some(v => b.indexOf(v) >= 0) : b.indexOf(a) >= 0)},
+  [CONTAINS_OP](a, b): boolean { return Array.isArray(a) && a.indexOf(b) >= 0 },
   [REGEX_OP](a, b): boolean { return b instanceof RegExp && b.test(a)},
   [LIKE_OP](a, b): boolean { return b && like2regex(b).test(a); },
 };
@@ -78,6 +80,7 @@ function checkCondition<T extends ValidQueryModelSignature<T>>(condition: ISimpl
         case LT_OP:
         case LTE_OP:
         case IN_OP:
+        case CONTAINS_OP:
         case LIKE_OP:
         case REGEX_OP:
           return checkCondition(condition, resolver, key);

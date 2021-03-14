@@ -11,3 +11,4 @@ export const LTE_OP = '$lte';
 export const REGEX_OP = '$regex';
 export const IN_OP = '$in';
 export const LIKE_OP = '$like';
+export const CONTAINS_OP = '$contains';

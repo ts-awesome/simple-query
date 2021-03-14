@@ -1,4 +1,4 @@
-const { evaluate, EQ_OP, NEQ_OP, IN_OP, REF_OP} = require('../dist');
+const { evaluate, IN_OP, REF_OP, CONTAINS_OP} = require('../dist');
 
 describe('operators', () => {
 
@@ -34,5 +34,10 @@ describe('operators', () => {
     expect(evaluate({[IN_OP]: {b: {[REF_OP]: 'sa'}}}, resolver)).toBe(true);
     expect(evaluate({[IN_OP]: {na: [1]}}, resolver)).toBe(true);
     expect(evaluate({[IN_OP]: {na: [10]}}, resolver)).toBe(false);
+  });
+
+  it('op contains', async () => {
+    expect(evaluate({[CONTAINS_OP]: {na: 1}}, resolver)).toBe(true);
+    expect(evaluate({[CONTAINS_OP]: {na: 10}}, resolver)).toBe(false);
   });
 })

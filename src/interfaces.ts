@@ -12,6 +12,7 @@ import {
   REGEX_OP,
   LIKE_OP,
   IN_OP,
+  CONTAINS_OP,
 } from "./operators";
 
 type StringOrNumberOrBoolean<T> = T extends string ? string : T extends number ? number : T extends boolean ? boolean: (string | number | boolean);
@@ -41,9 +42,8 @@ export interface ICondition<T extends ValidQueryModelSignature<T>, K extends key
 
   readonly [REGEX_OP]?: IPropertyValueQueryType<RegExp, T>;
   readonly [LIKE_OP]?: IPropertyValueQueryType<string, T>;
-  readonly [IN_OP]?: {
-    readonly [key in K]?: (readonly StringOrNumberOrBoolean<T[key]>[]) | Ref<T>;
-  };
+  readonly [CONTAINS_OP]?: IPropertyValueQueryType<string, T>;
+  readonly [IN_OP]?: { readonly [key in K]?: (readonly StringOrNumberOrBoolean<T[key]>[]) | Ref<T>; };
 
   readonly [AND_OP]?: readonly (ICondition<T> | IPropertyValueQuery<T>)[];
   readonly [OR_OP]?: readonly (ICondition<T> | IPropertyValueQuery<T>)[];
