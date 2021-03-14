@@ -21,6 +21,8 @@ describe('operators', () => {
     expect(evaluate({b: ['2', '3']}, resolver)).toBe(false);
     expect(evaluate({a: {[REF_OP]: 'na'}}, resolver)).toBe(true);
     expect(evaluate({b: {[REF_OP]: 'sa'}}, resolver)).toBe(true);
+    expect(evaluate({na: [1]}, resolver)).toBe(true);
+    expect(evaluate({na: [10]}, resolver)).toBe(false);
   });
 
   it('op in', async () => {
@@ -30,5 +32,7 @@ describe('operators', () => {
     expect(evaluate({[IN_OP]: {b: ['2', '3']}}, resolver)).toBe(false);
     expect(evaluate({[IN_OP]: {a: {[REF_OP]: 'na'}}}, resolver)).toBe(true);
     expect(evaluate({[IN_OP]: {b: {[REF_OP]: 'sa'}}}, resolver)).toBe(true);
+    expect(evaluate({[IN_OP]: {na: [1]}}, resolver)).toBe(true);
+    expect(evaluate({[IN_OP]: {na: [10]}}, resolver)).toBe(false);
   });
 })

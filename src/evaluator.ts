@@ -1,4 +1,4 @@
-import {ISimpleQuery} from "./interfaces";
+import {ISimpleQuery, ValidQueryModelSignature} from "./interfaces";
 import {
   AND_OP,
   EQ_OP,
@@ -14,12 +14,14 @@ import {
   REGEX_OP
 } from "./operators";
 
-interface ReferenceResolver {
-  (ref: string, value?: ISimpleQuery): number | string | boolean | number[] | string[] | null | undefined | RegExp;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface ReferenceResolver<T extends ValidQueryModelSignature<T> = any> {
+  (ref: string, value?: ISimpleQuery<T>): number | string | boolean | number[] | string[] | null | undefined | RegExp;
 }
 
-export function evaluate(query: ISimpleQuery, resolver: ReferenceResolver): boolean {
-  return checkCondition(query, resolver);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function evaluate<T extends ValidQueryModelSignature<T> = any>(query: ISimpleQuery<T>, resolver: ReferenceResolver<T>): boolean {
+  return checkCondition<T>(query, resolver);
 }
 
 function like2regex(s): RegExp {
@@ -28,18 +30,22 @@ function like2regex(s): RegExp {
 }
 
 const ops = {
-  [EQ_OP](a, b) { return a === b},
-  [NEQ_OP](a, b) { return a !== b},
-  [GT_OP](a, b) { return a > b},
-  [GTE_OP](a, b) { return a >= b},
-  [LT_OP](a, b) { return a < b},
-  [LTE_OP](a, b) { return a <= b},
-  [IN_OP](a, b) { return Array.isArray(b) && b.indexOf(a) >= 0},
-  [REGEX_OP](a, b) { return b instanceof RegExp && b.test(a)},
-  [LIKE_OP](a, b) { return b && like2regex(b).test(a); },
+  [EQ_OP](a, b): boolean { return a === b},
+  [NEQ_OP](a, b): boolean { return a !== b},
+  [GT_OP](a, b): boolean { return a > b},
+  [GTE_OP](a, b): boolean { return a >= b},
+  [LT_OP](a, b): boolean { return a < b},
+  [LTE_OP](a, b): boolean { return a <= b},
+  [IN_OP](a, b): boolean { return Array.isArray(b) && (Array.isArray(a) ? a.some(v => b.indexOf(v) >= 0) : b.indexOf(a) >= 0)},
+  [REGEX_OP](a, b): boolean { return b instanceof RegExp && b.test(a)},
+  [LIKE_OP](a, b): boolean { return b && like2regex(b).test(a); },
 };
 
-function checkCondition(condition: ISimpleQuery, resolver: ReferenceResolver, op: 'every'|'some'|string = 'every'): boolean {
+function hasOwnProperty(x: unknown, key: string): boolean {
+  return typeof x === 'object' && x != null && Object.prototype.hasOwnProperty.call(x, key);
+}
+
+function checkCondition<T extends ValidQueryModelSignature<T>>(condition: ISimpleQuery<T>, resolver: ReferenceResolver<T>, op: 'every'|'some'|string = 'every'): boolean {
   if (op && op !== 'every' && op !== 'some' && !ops[op]) { //assert
     throw new Error(`Unknown operation ${op}`);
   }
@@ -53,8 +59,8 @@ function checkCondition(condition: ISimpleQuery, resolver: ReferenceResolver, op
   }
 
   const fn: 'every'|'some' = op === 'some' ? 'some' : "every";
-  return Object.entries(condition)[fn]
-    (([key, condition]) => {
+  return Object.entries(condition)[fn](
+    ([key, condition]) => {
       switch (key) {
         case AND_OP:
           return checkCondition(condition, resolver, 'every');
@@ -77,7 +83,7 @@ function checkCondition(condition: ISimpleQuery, resolver: ReferenceResolver, op
           return checkCondition(condition, resolver, key);
 
         default:
-          if (typeof condition === 'object' && condition?.hasOwnProperty(REF_OP)) {
+          if (typeof condition === 'object' && hasOwnProperty(condition, REF_OP)) {
             condition = resolver(condition[REF_OP]);
           }
 
@@ -90,10 +96,6 @@ function checkCondition(condition: ISimpleQuery, resolver: ReferenceResolver, op
           }
 
           switch (typeof condition) {
-            case 'undefined':
-            case 'null' as any:
-              return resolver(key) == null;
-
             case 'number':
             case 'string':
             case 'boolean':
@@ -105,7 +107,12 @@ function checkCondition(condition: ISimpleQuery, resolver: ReferenceResolver, op
               }
 
               if (Array.isArray(condition)) {
-                return condition.indexOf(resolver(key)) >= 0;
+                const value = resolver(key);
+                if (!Array.isArray(value)) {
+                  return condition.indexOf(value) >= 0;
+                }
+
+                return value.some(v => condition.indexOf(v) >= 0)
               }
 
               if (condition instanceof RegExp) {
