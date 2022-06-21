@@ -1,9 +1,13 @@
 {
   "name": "@ts-awesome/simple-query",
   "version": "0.0.0",
-  "description": "TypeScript SimpleQuery evaluator",
+  "description": "TypeScript friendly SimpleQuery evaluator",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ts-awesome/simple-query"
+  },
   "scripts": {
     "build": "tsc",
     "lint": "eslint \"src/**/*.ts\"",

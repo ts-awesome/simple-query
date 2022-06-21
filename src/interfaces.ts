@@ -1,8 +1,11 @@
 import {
   AND_OP,
+  CONTAINS_OP,
   EQ_OP,
   GT_OP,
   GTE_OP,
+  IN_OP,
+  LIKE_OP,
   LT_OP,
   LTE_OP,
   NEQ_OP,
@@ -10,9 +13,6 @@ import {
   OR_OP,
   REF_OP,
   REGEX_OP,
-  LIKE_OP,
-  IN_OP,
-  CONTAINS_OP,
 } from "./operators";
 
 type StringOrNumberOrBoolean<T> = T extends string ? string : T extends number ? number : T extends boolean ? boolean: (string | number | boolean);
@@ -53,3 +53,16 @@ export interface ICondition<T extends ValidQueryModelSignature<T>, K extends key
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ISimpleQuery<T extends ValidQueryModelSignature<T> = any> = ICondition<T> | IPropertyValueQuery<T>;
+
+export type IOrderBy<T extends ValidQueryModelSignature<T>> = {
+  readonly [key in keyof T]: 'ASC' | 'DESC';
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface ReferenceResolver<T extends ValidQueryModelSignature<T> = any> {
+  (ref: string, value?: ISimpleQuery<T>): number | string | boolean | number[] | string[] | null | undefined | RegExp;
+}
+
+export interface ReferenceResolverFactory<T extends ValidQueryModelSignature<T> = any> {
+  (obj: T): ReferenceResolver<T>
+}

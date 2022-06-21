@@ -1,9 +1,11 @@
-import {ISimpleQuery, ValidQueryModelSignature} from "./interfaces";
+import {ISimpleQuery, ReferenceResolver, ReferenceResolverFactory, ValidQueryModelSignature} from "./interfaces";
 import {
   AND_OP,
+  CONTAINS_OP,
   EQ_OP,
   GT_OP,
-  GTE_OP, IN_OP,
+  GTE_OP,
+  IN_OP,
   LIKE_OP,
   LT_OP,
   LTE_OP,
@@ -12,17 +14,26 @@ import {
   OR_OP,
   REF_OP,
   REGEX_OP,
-  CONTAINS_OP,
+  standardResolverFor,
 } from "./operators";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-interface ReferenceResolver<T extends ValidQueryModelSignature<T> = any> {
-  (ref: string, value?: ISimpleQuery<T>): number | string | boolean | number[] | string[] | null | undefined | RegExp;
-}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function evaluate<T extends ValidQueryModelSignature<T> = any>(query: ISimpleQuery<T>, resolver: ReferenceResolver<T>): boolean {
   return checkCondition<T>(query, resolver);
+}
+
+export function match<T extends ValidQueryModelSignature<T>>(candidate: T, condition: ISimpleQuery<T>, resolverFactory: ReferenceResolverFactory<T> = standardResolverFor): boolean {
+  return evaluate(condition, resolverFactory(candidate))
+}
+
+export function filter<T extends ValidQueryModelSignature<T>>(source: Iterable<T>, condition: ISimpleQuery<T>, resolverFactory?: ReferenceResolverFactory<T>): readonly T[] {
+  const result: T[] = [];
+  for(const item of source) {
+    if (match(item, condition, resolverFactory)) {
+      result.push(item);
+    }
+  }
+  return result;
 }
 
 function like2regex(s): RegExp {
@@ -118,6 +129,7 @@ function checkCondition<T extends ValidQueryModelSignature<T>>(condition: ISimpl
                 return value.some(v => condition.indexOf(v) >= 0)
               }
 
+              // noinspection SuspiciousTypeOfGuard
               if (condition instanceof RegExp) {
                 return condition.test(resolver(key) as string);
               }
